@@ -13,7 +13,6 @@ import Joi from 'joi';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
