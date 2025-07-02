@@ -3,8 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
-import { ProvaModule } from './provva/prova/prova.module';
-import { PackageModule } from './package/package.module';
 import { CollectionModule } from './collection/collection.module';
 import { CategoryModule } from './category/category.module';
 import { CardModule } from './card/card.module';
@@ -12,6 +10,9 @@ import { IssueModule } from './issue/issue.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import * as config from '../config.json';
 import Joi from 'joi';
+
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 
 @Module({
   imports: [
@@ -22,9 +23,17 @@ import Joi from 'joi';
       isGlobal: true,
       load: [() => config],
     }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 3306,
+      username: 'root',
+      password: 'root',
+      database: 'test',
+      entities: [],
+      synchronize: true, // disable in production
+    }),
     UserModule,
-    ProvaModule,
-    PackageModule,
     CollectionModule,
     CategoryModule,
     CardModule,
