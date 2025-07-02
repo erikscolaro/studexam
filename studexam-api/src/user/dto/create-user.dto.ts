@@ -1,9 +1,11 @@
-import { IsEmail, IsEnum, IsOptional, IsString, Length, Matches } from 'class-validator';
-import { UserRole } from '../entities/user.entity';
+import { IsEmail, IsOptional, IsString, Length, Matches } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
   @Length(3, 50)
+  @Matches(/^[a-zA-Z0-9_]+$/, {
+    message: 'Username can contain only letters, numbers, and underscores',
+  })
   username: string;
 
   @IsEmail()

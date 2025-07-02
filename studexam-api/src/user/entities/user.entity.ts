@@ -1,11 +1,12 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import * as argon2 from 'argon2'
+import { Exclude} from 'class-transformer';
 
 export enum UserRole {
-  ADMIN = 'admin',
-  MODERATOR = 'moderator',
-  PREMIUM = 'premium',
-  STANDARD = 'standard',
+  ADMIN = 'Admin',
+  MODERATOR = 'Moderator',
+  PREMIUM = 'Premium',
+  STANDARD = 'Standard',
 }
 
 @Entity()
@@ -16,7 +17,6 @@ export class User {
   @Column({
 		type: "varchar",
 		length: 50,
-		unique: true
 	})
   username: string;
 
@@ -51,19 +51,20 @@ export class User {
 		type: "string",
 		nullable: false
 	})
+	@Exclude()
   password: string;
 
-@BeforeInsert()
-@BeforeUpdate()
-async hashPassword() {
-  if (this.password && !this.password.startsWith('$argon2')) { // semplice check
-    this.password = await argon2.hash(this.password);
-  }
-}
+	@BeforeInsert()
+	@BeforeUpdate()
+	async hashPassword() {
+		if (this.password && !this.password.startsWith('$argon2')) { // semplice check
+			this.password = await argon2.hash(this.password);
+		}
+	}
 
-async verifyPassword(plainPassword: string): Promise<boolean> {
-	return await argon2.verify(this.password, plainPassword);
-}
+	async verifyPassword(plainPassword: string): Promise<boolean> {
+		return await argon2.verify(this.password, plainPassword);
+	}
 
 }
 
