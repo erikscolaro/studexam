@@ -1,15 +1,13 @@
 import {
-  IsEmail,
   IsEnum,
   IsInt,
   IsOptional,
   IsString,
   IsUUID,
   Length,
-  Matches,
 } from 'class-validator';
-import { UserRole } from '../entities/user.entity';
 import { Expose } from 'class-transformer';
+import { UserRole } from 'src/common/userRoles';
 
 export class PublicUserDTO {
   @Expose()
@@ -28,4 +26,10 @@ export class PublicUserDTO {
   @Expose()
   @IsEnum(UserRole)
   role: UserRole;
+
+  @Expose()
+  @IsString()
+  @Length(2, 2)
+  @IsOptional()
+  language: string;
 }

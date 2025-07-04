@@ -3,17 +3,16 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryFailedError, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { LoginUserDto } from './dto/login-user.dto';
 import { ILike } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { PublicUserDTO } from './dto/public-user.dto';
+import { UserRole } from 'src/common/userRoles';
 
 @Injectable()
 export class UsersService {
@@ -39,12 +38,15 @@ export class UsersService {
   }
 
   // needs for searching other users to implement follow technique
-  async findPublicUsersByUsernameLike(username: string): Promise<PublicUserDTO[]> {
+  async findPublicUsersByUsernameLike(
+    username: string,
+    take: number,
+  ): Promise<PublicUserDTO[]> {
     try {
       // if query is ro, it will look for all username starting with ro, Ro, rO or RO
       const user = await this.repo.find({
         where: { username: ILike(`${username}%`) },
-        take: 3,
+        take: take,
       });
       //masking user fields for safety
       const maskedUser = user.map((user) =>
@@ -65,7 +67,7 @@ export class UsersService {
     try {
       const user = await this.repo.findOneBy({ id });
       if (!user) throw new NotFoundException('User not found');
-      // returning a masked user 
+      // returning a masked user
       return plainToInstance(PublicUserDTO, user, {
         excludeExtraneousValues: true,
       });
@@ -76,7 +78,7 @@ export class UsersService {
     }
   }
 
-  async findCompleteUserByEmail(email: string): Promise<UserEntity|null> {
+  async findCompleteUserByEmail(email: string): Promise<UserEntity | null> {
     let user;
     try {
       user = await this.repo.findOneBy({ email });
@@ -88,7 +90,10 @@ export class UsersService {
     }
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserEntity> {
+  async updateUser(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserEntity> {
     const user = await this.repo.findOneBy({ id });
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
     Object.assign(user, updateUserDto);
@@ -106,6 +111,16 @@ export class UsersService {
     try {
       const user = await this.repo.findOneBy({ id });
       return user;
+    } catch {
+      throw new InternalServerErrorException(
+        'Internal server error. Try again later.',
+      );
+    }
+  }
+
+  async updateUserRoleById(id: string, role: UserRole) {
+    try {
+      await this.repo.update(id, { role: role });
     } catch {
       throw new InternalServerErrorException(
         'Internal server error. Try again later.',

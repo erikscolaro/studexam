@@ -7,7 +7,10 @@ import { UserEntity } from 'src/users/entities/user.entity';
 import { Request } from 'express';
 
 @Injectable()
-export class JwtStrategyCompleteUser extends PassportStrategy(Strategy, 'jwt-complete') {
+export class JwtStrategyCompleteUser extends PassportStrategy(
+  Strategy,
+  'jwt-complete',
+) {
   constructor(
     private configService: ConfigService,
     private usersService: UsersService,

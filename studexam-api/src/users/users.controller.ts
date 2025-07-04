@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
@@ -9,46 +8,45 @@ import {
   Query,
   UseGuards,
   ForbiddenException,
+  HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from 'src/auth/decorators/user.decorator';
+import { User } from 'src/common/decorators/user.decorator';
 import { PublicUserDTO } from './dto/public-user.dto';
-import { JwtAuthGuardPartialUser } from 'src/auth/guards/jwt-auth-partial.guard';
+import { JwtAuthGuardPartialUser } from 'src/common/guards/jwt-auth-partial.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RolesGuard } from 'src/common/guards/role.guard';
+import { UserRole } from 'src/common/userRoles';
+import { JwtAuthGuardCompleteUser } from 'src/common/guards/jwt-auth-complete.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
-  // regsitration or creation of new user, unprotected
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
-  }
-
   // find user by uuid, needs protection
   @Get(':id')
   @UseGuards(JwtAuthGuardPartialUser)
-  findAll(@Param('id') id: string) {
-    return this.userService.findPublicUserById(id);
+  async findAll(@Param('id') id: string): Promise<PublicUserDTO> {
+    return await this.userService.findPublicUserById(id);
   }
 
   // find users by partial username, needs protection
   @Get()
-  @UseGuards(JwtAuthGuardPartialUser)
+  @UseGuards(JwtAuthGuardPartialUser, RolesGuard)
+  @Roles([UserRole.ADMIN, UserRole.MODERATOR, UserRole.PREMIUM])
   findOne(@Query('search') partailUsername: string) {
     if (!partailUsername) return [];
-    return this.userService.findPublicUsersByUsernameLike(partailUsername);
+    return this.userService.findPublicUsersByUsernameLike(partailUsername, 3);
   }
 
   // update a user, needs protection - solo l'utente stesso può modificare i propri dati
   @Patch(':id')
   @UseGuards(JwtAuthGuardPartialUser)
   update(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @User() currentUser: PublicUserDTO
+    @User() currentUser: PublicUserDTO,
   ) {
     // Verifica che l'utente possa modificare solo i propri dati
     if (currentUser.id !== id) {
@@ -66,5 +64,13 @@ export class UsersController {
       throw new ForbiddenException('You can only delete your own account');
     }
     return this.userService.removeUser(id);
+  }
+
+  @Patch(':id/role')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuardCompleteUser, RolesGuard)
+  @Roles([UserRole.ADMIN])
+  modifyRole(@Param('id') id: string, @Body('role') role: UserRole) {
+    this.userService.updateUserRoleById(id, role);
   }
 }

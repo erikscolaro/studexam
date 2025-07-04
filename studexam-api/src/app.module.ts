@@ -17,13 +17,13 @@ import { AuthModule } from './auth/auth.module';
           .valid('development', 'production', 'test')
           .default('development'),
         PORT: Joi.number().default(3000),
-        DB_TYPE: Joi.string().valid('postgres','mysql').default('postgres'),
+        DB_TYPE: Joi.string().valid('postgres', 'mysql').default('postgres'),
         DB_HOST: Joi.string().default('localhost'),
         DB_PORT: Joi.number().default(5432),
         DB_USER: Joi.string().default('root'),
         DB_PASS: Joi.string().default('root'),
         DB_NAME: Joi.string().default('test'),
-        JWT_SECRET: Joi.string().default('sercret')
+        JWT_SECRET: Joi.string().default('sercret'),
       }),
       isGlobal: true,
       load: [() => config],
