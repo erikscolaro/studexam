@@ -1,4 +1,11 @@
 {
-  "port": 3000,
-  "dbHost": "localhost"
+  "NODE_ENV": "development",
+  "PORT": 3000,
+  "DB_TYPE": "postgres",
+  "DB_HOST": "localhost",
+  "DB_PORT": 5432,
+  "DB_USER": "studexam_api",
+  "DB_PASS": "studexam_password",
+  "DB_NAME": "studexam_db_dev",
+  "JWT_SECRET": "DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE."
 }

@@ -1,43 +1,50 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './user/user.module';
-import { CollectionModule } from './collection/collection.module';
-import { CategoryModule } from './category/category.module';
-import { CardModule } from './card/card.module';
-import { IssueModule } from './issue/issue.module';
-import { SubscriptionModule } from './subscription/subscription.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from './users/users.module';
 import * as config from '../config.json';
 import Joi from 'joi';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       validationSchema: Joi.object({
-        //TODO
+        NODE_ENV: Joi.string()
+          .valid('development', 'production', 'test')
+          .default('development'),
+        PORT: Joi.number().default(3000),
+        DB_TYPE: Joi.string().valid('postgres','mysql').default('postgres'),
+        DB_HOST: Joi.string().default('localhost'),
+        DB_PORT: Joi.number().default(5432),
+        DB_USER: Joi.string().default('root'),
+        DB_PASS: Joi.string().default('root'),
+        DB_NAME: Joi.string().default('test'),
+        JWT_SECRET: Joi.string().default('sercret')
       }),
       isGlobal: true,
       load: [() => config],
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'test',
-      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      synchronize: true, // disable in production
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: configService.get<'postgres' | 'mysql'>('DB_TYPE', 'postgres'),
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USER'),
+        password: configService.get<string>('DB_PASS'),
+        database: configService.get<string>('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize:
+          configService.get<string>('NODE_ENV') === 'production' ? false : true,
+      }),
     }),
-    UserModule,
-    CollectionModule,
-    CategoryModule,
-    CardModule,
-    IssueModule,
-    SubscriptionModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
