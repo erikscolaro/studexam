@@ -8,6 +8,9 @@ import Joi from 'joi';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { CategoriesModule } from './categories/categories.module';
+import { PackagesModule } from './packages/packages.module';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -45,6 +48,8 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     AuthModule,
+    PackagesModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
