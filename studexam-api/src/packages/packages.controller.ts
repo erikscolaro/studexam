@@ -39,9 +39,19 @@ export class PackagesController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
   ) {
     // Parse keywords from comma-separated string
-    const keywords = keywordsParam ? keywordsParam.split(',').map(k => k.trim()).filter(k => k) : [];
-    
-    return this.packagesService.searchByKeywords(keywords, partialName, page, limit);
+    const keywords = keywordsParam
+      ? keywordsParam
+          .split(',')
+          .map((k) => k.trim())
+          .filter((k) => k)
+      : [];
+
+    return this.packagesService.searchPackages(
+      keywords,
+      partialName,
+      page,
+      limit,
+    );
   }
 
   @Get(':id')
@@ -50,7 +60,10 @@ export class PackagesController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updatePackageDto: UpdatePackageDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePackageDto: UpdatePackageDto,
+  ) {
     return this.packagesService.update(id, updatePackageDto);
   }
 

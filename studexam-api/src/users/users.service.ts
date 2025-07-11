@@ -10,7 +10,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryFailedError, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { ILike } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { PublicUserDTO } from './dto/public-user.dto';
 import { UserRole } from 'src/common/userRoles';

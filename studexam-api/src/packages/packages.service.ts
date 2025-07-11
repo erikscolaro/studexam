@@ -17,7 +17,10 @@ export class PackagesService {
     return await this.packageRepository.save(packageEntity);
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<{ packages: PackageEntity[], total: number }> {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ packages: PackageEntity[]; total: number }> {
     const [packages, total] = await this.packageRepository.findAndCount({
       relations: ['author', 'tags'],
       skip: (page - 1) * limit,
@@ -31,15 +34,18 @@ export class PackagesService {
       where: { id },
       relations: ['author', 'tags'],
     });
-    
+
     if (!packageEntity) {
       throw new NotFoundException(`Package with ID ${id} not found`);
     }
-    
+
     return packageEntity;
   }
 
-  async update(id: number, updatePackageDto: UpdatePackageDto): Promise<PackageEntity> {
+  async update(
+    id: number,
+    updatePackageDto: UpdatePackageDto,
+  ): Promise<PackageEntity> {
     const packageEntity = await this.findOne(id);
     Object.assign(packageEntity, updatePackageDto);
     return await this.packageRepository.save(packageEntity);
@@ -50,21 +56,24 @@ export class PackagesService {
     await this.packageRepository.remove(packageEntity);
   }
 
-  async searchByKeywords(
+  async searchPackages(
     keywords: string[] = [],
     partialName?: string,
     page: number = 1,
-    limit: number = 10
-  ): Promise<{ packages: PackageEntity[], total: number }> {
+    limit: number = 10,
+  ): Promise<{ packages: PackageEntity[]; total: number }> {
     // Validate input requirements
     const hasValidPartialName = partialName && partialName.trim().length >= 3;
     const hasEnoughKeywords = keywords.length >= 3;
-    
+
     if (!hasValidPartialName && !hasEnoughKeywords) {
-      throw new Error('Either provide at least 3 keywords or a partial name with at least 3 characters');
+      throw new Error(
+        'Either provide at least 3 keywords or a partial name with at least 3 characters',
+      );
     }
 
-    const queryBuilder = this.packageRepository.createQueryBuilder('package')
+    const queryBuilder = this.packageRepository
+      .createQueryBuilder('package')
       .leftJoinAndSelect('package.author', 'author')
       .leftJoinAndSelect('package.tags', 'tags');
 
@@ -75,7 +84,7 @@ export class PackagesService {
     // Add partial name condition if valid
     if (hasValidPartialName) {
       whereConditions.push('package.name ILIKE :partialName');
-      queryParams.partialName = `%${partialName}%`;
+      queryParams.partialName = `${partialName}%`;
     }
 
     // Add keyword condition if provided
@@ -92,7 +101,10 @@ export class PackagesService {
     // If we have keywords, group and order by match count for efficiency
     if (keywords.length > 0) {
       queryBuilder
-        .addSelect('COUNT(CASE WHEN tags.slug IN (:...keywords) THEN 1 END)', 'keyword_matches')
+        .addSelect(
+          'COUNT(CASE WHEN tags.slug IN (:...keywords) THEN 1 END)',
+          'keyword_matches',
+        )
         .groupBy('package.id')
         .addGroupBy('author.id')
         .orderBy('keyword_matches', 'DESC')
@@ -102,7 +114,8 @@ export class PackagesService {
     }
 
     // Get total count for pagination (separate query for accuracy)
-    const totalQueryBuilder = this.packageRepository.createQueryBuilder('package')
+    const totalQueryBuilder = this.packageRepository
+      .createQueryBuilder('package')
       .leftJoin('package.tags', 'tags');
 
     if (whereConditions.length > 0) {
@@ -116,12 +129,10 @@ export class PackagesService {
     const totalCount = await totalQueryBuilder.getCount();
 
     // Apply pagination and get results
-    queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit);
+    queryBuilder.skip((page - 1) * limit).take(limit);
 
     const packages = await queryBuilder.getMany();
-    
+
     return { packages, total: totalCount };
   }
 }
