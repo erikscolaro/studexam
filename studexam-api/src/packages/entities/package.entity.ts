@@ -60,7 +60,7 @@ export class PackageEntity {
   language: string;
 
   @Expose()
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: true })
   author: UserEntity;
 
   // category search disabled
