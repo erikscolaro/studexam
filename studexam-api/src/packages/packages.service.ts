@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePackageDto } from './dto/create-package.dto';
@@ -67,7 +67,7 @@ export class PackagesService {
     const hasEnoughKeywords = keywords.length >= 3;
 
     if (!hasValidPartialName && !hasEnoughKeywords) {
-      throw new Error(
+      throw new BadRequestException(
         'Either provide at least 3 keywords or a partial name with at least 3 characters',
       );
     }
@@ -77,62 +77,37 @@ export class PackagesService {
       .leftJoinAndSelect('package.author', 'author')
       .leftJoinAndSelect('package.tags', 'tags');
 
-    // Build where conditions
-    const whereConditions = [];
-    const queryParams: any = {};
-
     // Add partial name condition if valid
     if (hasValidPartialName) {
-      whereConditions.push('package.name ILIKE :partialName');
-      queryParams.partialName = `${partialName}%`;
+      queryBuilder.andWhere('package.name ILIKE :partialName', {
+        partialName: `${partialName}%`,
+      });
     }
 
     // Add keyword condition if provided
     if (keywords.length > 0) {
-      whereConditions.push('tags.slug IN (:...keywords)');
-      queryParams.keywords = keywords;
+      queryBuilder.andWhere('tags.slug = ANY(:keywords)', {
+        keywords,
+      });
     }
 
-    // Apply conditions
-    if (whereConditions.length > 0) {
-      queryBuilder.where(whereConditions.join(' AND '), queryParams);
-    }
-
-    // If we have keywords, group and order by match count for efficiency
+    // Ordering logic
     if (keywords.length > 0) {
       queryBuilder
-        .addSelect(
-          'COUNT(CASE WHEN tags.slug IN (:...keywords) THEN 1 END)',
-          'keyword_matches',
-        )
-        .groupBy('package.id')
-        .addGroupBy('author.id')
-        .orderBy('keyword_matches', 'DESC')
+        .addSelect('COUNT(tags.id)', 'tag_count')
+        .groupBy('package.id, author.id')
+        .orderBy('tag_count', 'DESC')
         .addOrderBy('package.createdAt', 'DESC');
     } else {
       queryBuilder.orderBy('package.createdAt', 'DESC');
     }
 
-    // Get total count for pagination (separate query for accuracy)
-    const totalQueryBuilder = this.packageRepository
-      .createQueryBuilder('package')
-      .leftJoin('package.tags', 'tags');
-
-    if (whereConditions.length > 0) {
-      totalQueryBuilder.where(whereConditions.join(' AND '), queryParams);
-    }
-
-    if (keywords.length > 0) {
-      totalQueryBuilder.groupBy('package.id');
-    }
-
-    const totalCount = await totalQueryBuilder.getCount();
-
-    // Apply pagination and get results
+    // Apply pagination
     queryBuilder.skip((page - 1) * limit).take(limit);
 
-    const packages = await queryBuilder.getMany();
+    // Single query with getManyAndCount for efficiency
+    const [packages, total] = await queryBuilder.getManyAndCount();
 
-    return { packages, total: totalCount };
+    return { packages, total };
   }
 }
