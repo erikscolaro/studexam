@@ -1,8 +1,11 @@
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
+import { TagEntity } from 'src/tags/entities/tag.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -68,4 +71,12 @@ export class PackageEntity {
   //  onUpdate: 'CASCADE'
   //})
   //parentCategory: CategoryEntity;
+
+  @Exclude()
+  @ManyToMany(()=> TagEntity, (tag) => tag.packages, {
+    nullable: false,
+  })
+  @JoinTable()
+  tags: TagEntity[];
+
 }
