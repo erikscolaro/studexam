@@ -1,7 +1,15 @@
-import { Exclude, Expose } from "class-transformer";
-import { UserEntity } from "src/users/entities/user.entity";
-import { Column, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Exclude, Expose } from 'class-transformer';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { PackageEntity } from 'src/packages/entities/package.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
+@Entity()
 export class TagEntity {
   @Expose()
   @PrimaryGeneratedColumn('uuid')
@@ -10,7 +18,7 @@ export class TagEntity {
   @Expose()
   @Column({
     type: 'varchar',
-    length: 50
+    length: 50,
   })
   name: string;
 
@@ -18,28 +26,31 @@ export class TagEntity {
   @Column({
     type: 'varchar',
     length: 50,
-    unique: true
+    unique: true,
   })
   slug: string;
 
   @Exclude()
   @Column({
-    type: 'timestamptz'
+    type: 'timestamptz',
   })
   created_at: Date;
 
   @Exclude()
   @ManyToOne(() => UserEntity, {
     nullable: true,
-    onDelete: 'SET NULL'
+    onDelete: 'SET NULL',
   })
-  author: UserEntity
+  author: UserEntity;
 
   @Exclude()
   @Column({
     type: 'boolean',
-    default: true
+    default: true,
   })
-  active: boolean
+  active: boolean;
 
+  @Exclude()
+  @ManyToMany(() => PackageEntity, (pkg) => pkg.tags)
+  packages: PackageEntity[];
 }

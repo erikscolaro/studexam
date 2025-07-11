@@ -10,7 +10,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryFailedError, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { ILike } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { PublicUserDTO } from './dto/public-user.dto';
 import { UserRole } from 'src/common/userRoles';
@@ -45,15 +44,15 @@ export class UsersService {
   ): Promise<UserEntity[] | PublicUserDTO[]> {
     try {
       const queryBuilder = this.repo.createQueryBuilder('user');
-      
+
       queryBuilder.where('user.username ILIKE :username', {
-        username: `${username}%`
+        username: `${username}%`,
       });
       queryBuilder.skip((page - 1) * limit);
       queryBuilder.take(limit);
-      
+
       const users = await queryBuilder.getMany();
-      
+
       if (returnComplete) {
         return users;
       } else {
@@ -79,7 +78,7 @@ export class UsersService {
   ): Promise<UserEntity | PublicUserDTO | null> {
     try {
       const queryBuilder = this.repo.createQueryBuilder('user');
-      
+
       if (id) {
         queryBuilder.where('user.id = :id', { id });
       } else if (email) {
@@ -87,9 +86,9 @@ export class UsersService {
       } else {
         throw new BadRequestException('Either id or email must be provided');
       }
-      
+
       const user = await queryBuilder.getOne();
-      
+
       if (!user) {
         if (returnComplete) {
           return null;
@@ -97,7 +96,7 @@ export class UsersService {
           throw new NotFoundException('User not found');
         }
       }
-      
+
       if (returnComplete) {
         return user;
       } else {
@@ -123,15 +122,15 @@ export class UsersService {
     try {
       const user = await this.repo.findOneBy({ id });
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-      
+
       if (updateData) {
         Object.assign(user, updateData);
       }
-      
+
       if (role !== undefined) {
         user.role = role;
       }
-      
+
       return await this.repo.save(user);
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -147,5 +146,14 @@ export class UsersService {
     const user = await this.repo.findOneBy({ id });
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
     await this.repo.remove(user);
+  }
+
+  // Methods for authentication service
+  async findCompleteUserByEmail(email: string): Promise<UserEntity | null> {
+    return (await this.findUser(true, undefined, email)) as UserEntity | null;
+  }
+
+  async findCompleteUserById(id: string): Promise<UserEntity | null> {
+    return (await this.findUser(true, id)) as UserEntity | null;
   }
 }

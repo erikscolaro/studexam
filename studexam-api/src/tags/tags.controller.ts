@@ -1,13 +1,13 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Patch, 
-  Param, 
-  Delete, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
   UseGuards,
-  Query
+  Query,
 } from '@nestjs/common';
 import { TagsService } from './tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
@@ -30,7 +30,7 @@ export class TagsController {
   @UseGuards(JwtAuthGuardPartialUser, RolesGuard)
   @Roles([UserRole.ADMIN, UserRole.MODERATOR, UserRole.PREMIUM])
   create(@Body() createTagDto: CreateTagDto, @User() user: PublicUserDTO) {
-    createTagDto.active=true;
+    createTagDto.active = true;
     return this.tagsService.create(createTagDto, user.id);
   }
 
@@ -42,7 +42,7 @@ export class TagsController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('search') partialName?: string,
-    @Query('active') active?: boolean
+    @Query('active') active?: boolean,
   ) {
     return this.tagsService.findAll(page, limit, partialName, active);
   }

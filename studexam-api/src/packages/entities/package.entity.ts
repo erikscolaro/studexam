@@ -60,7 +60,7 @@ export class PackageEntity {
   language: string;
 
   @Expose()
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: true })
   author: UserEntity;
 
   // category search disabled
@@ -72,11 +72,10 @@ export class PackageEntity {
   //})
   //parentCategory: CategoryEntity;
 
-  @Exclude()
-  @ManyToMany(()=> TagEntity, (tag) => tag.packages, {
+  @Expose()
+  @ManyToMany(() => TagEntity, (tag) => tag.packages, {
     nullable: false,
   })
   @JoinTable()
   tags: TagEntity[];
-
 }

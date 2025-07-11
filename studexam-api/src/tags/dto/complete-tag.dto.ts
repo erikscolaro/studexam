@@ -1,5 +1,5 @@
-import { Exclude, Expose } from "class-transformer";
-import { UserEntity } from "src/users/entities/user.entity";
+import { Exclude, Expose } from 'class-transformer';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 export class CompleteTagDto {
   @Expose()
