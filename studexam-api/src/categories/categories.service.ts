@@ -65,7 +65,10 @@ export class CategoriesService {
     }
   }
 
-  async findRootCategories(skip: number, take: number): Promise<CategoryEntity[]>{
+  async findRootCategories(
+    skip: number,
+    take: number,
+  ): Promise<CategoryEntity[]> {
     try {
       return await this.repo.find({
         where: { parentCategory: IsNull() },

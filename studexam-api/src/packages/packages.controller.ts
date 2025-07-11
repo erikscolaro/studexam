@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
+} from '@nestjs/common';
 import { PackagesService } from './packages.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
@@ -13,22 +24,38 @@ export class PackagesController {
   }
 
   @Get()
-  findAll() {
-    return this.packagesService.findAll();
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.packagesService.findAll(page, limit);
+  }
+
+  @Get('search')
+  search(
+    @Query('keywords') keywordsParam?: string,
+    @Query('partialName') partialName?: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+  ) {
+    // Parse keywords from comma-separated string
+    const keywords = keywordsParam ? keywordsParam.split(',').map(k => k.trim()).filter(k => k) : [];
+    
+    return this.packagesService.searchByKeywords(keywords, partialName, page, limit);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.packagesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updatePackageDto: UpdatePackageDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() updatePackageDto: UpdatePackageDto) {
     return this.packagesService.update(id, updatePackageDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.packagesService.remove(id);
   }
 }

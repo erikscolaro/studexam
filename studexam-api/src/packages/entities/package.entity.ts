@@ -72,11 +72,10 @@ export class PackageEntity {
   //})
   //parentCategory: CategoryEntity;
 
-  @Exclude()
-  @ManyToMany(()=> TagEntity, (tag) => tag.packages, {
+  @Expose()
+  @ManyToMany(() => TagEntity, (tag) => tag.packages, {
     nullable: false,
   })
   @JoinTable()
   tags: TagEntity[];
-
 }

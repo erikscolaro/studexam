@@ -26,7 +26,7 @@ export class CategoryEntity {
   @Column({
     type: 'varchar',
     length: 100,
-    nullable: true
+    nullable: true,
   })
   description?: string;
 
@@ -37,8 +37,8 @@ export class CategoryEntity {
   @Expose()
   @ManyToOne(() => CategoryEntity, (category) => category.childCategories, {
     nullable: true,
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE"
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   parentCategory: CategoryEntity;
 

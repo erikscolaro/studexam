@@ -43,8 +43,8 @@ export class CategoriesController {
     @Query('root') isRoot: boolean,
     @User() userInfo: PublicUserDTO,
   ) {
-    if (!page) page=1;
-    if (!limit) limit=10;
+    if (!page) page = 1;
+    if (!limit) limit = 10;
     if (limit > 25)
       throw new BadRequestException('Limit should be between 1 and 25.');
     if (page <= 0)
@@ -56,10 +56,9 @@ export class CategoriesController {
     if (isRoot) {
       categories = await this.categoriesService.findRootCategories(
         (page - 1) * limit,
-        limit
-      )
-    }
-    else if (userInfo.role != UserRole.STANDARD) {
+        limit,
+      );
+    } else if (userInfo.role != UserRole.STANDARD) {
       categories = await this.categoriesService.findManyByPartialName(
         name,
         (page - 1) * limit,
