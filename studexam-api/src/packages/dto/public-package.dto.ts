@@ -1,5 +1,5 @@
 import { Expose, Transform } from 'class-transformer';
-import { TagEntity } from 'src/tags/entities/tag.entity';
+import { TagEntity } from '../../tags/entities/tag.entity';
 
 export class PublicPackageDto {
   @Expose()

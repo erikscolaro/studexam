@@ -3,10 +3,10 @@ import { PackagesService } from './packages.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { SearchPackagesDto } from './dto/search-packages.dto';
 import { PublicPackageDto } from './dto/public-package.dto';
-import { JwtAuthGuardCompleteUser } from 'src/auth/guards/jwt-auth-complete.guard';
-import { JwtAuthGuardPartialUser } from 'src/auth/guards/jwt-auth-partial.guard';
-import { User } from 'src/auth/decorators/user.decorator';
-import { UserEntity } from 'src/users/entities/user.entity';
+import { JwtAuthGuardCompleteUser } from '../auth/guards/jwt-auth-complete.guard';
+import { JwtAuthGuardPartialUser } from '../auth/guards/jwt-auth-partial.guard';
+import { User } from '../auth/decorators/user.decorator';
+import { UserEntity } from '../users/entities/user.entity';
 import { plainToClass } from 'class-transformer';
 
 @Controller('packages')

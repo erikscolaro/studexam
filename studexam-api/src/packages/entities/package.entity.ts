@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
-import { UserEntity } from 'src/users/entities/user.entity';
-import { TagEntity } from 'src/tags/entities/tag.entity';
+import { UserEntity } from '../../users/entities/user.entity';
+import { TagEntity } from '../../tags/entities/tag.entity';
 import { Exclude, Expose } from 'class-transformer';
 
 @Entity()
@@ -73,5 +73,11 @@ export class PackageEntity {
   @Expose()
   get tagCount(): number {
     return this.tags?.length || 0;
+  }
+
+  // Helper method to get matching keyword count
+  getMatchingKeywordCount(keywordSlugs: string[]): number {
+    if (!this.tags || !keywordSlugs.length) return 0;
+    return this.tags.filter(tag => keywordSlugs.includes(tag.slug)).length;
   }
 }
