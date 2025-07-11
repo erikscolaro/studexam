@@ -8,6 +8,9 @@ import Joi from 'joi';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { CategoriesModule } from './categories/categories.module';
+import { PackagesModule } from './packages/packages.module';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -17,13 +20,13 @@ import { AuthModule } from './auth/auth.module';
           .valid('development', 'production', 'test')
           .default('development'),
         PORT: Joi.number().default(3000),
-        DB_TYPE: Joi.string().valid('postgres','mysql').default('postgres'),
+        DB_TYPE: Joi.string().valid('postgres', 'mysql').default('postgres'),
         DB_HOST: Joi.string().default('localhost'),
         DB_PORT: Joi.number().default(5432),
         DB_USER: Joi.string().default('root'),
         DB_PASS: Joi.string().default('root'),
         DB_NAME: Joi.string().default('test'),
-        JWT_SECRET: Joi.string().default('sercret')
+        JWT_SECRET: Joi.string().default('sercret'),
       }),
       isGlobal: true,
       load: [() => config],
@@ -45,6 +48,8 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     AuthModule,
+    PackagesModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

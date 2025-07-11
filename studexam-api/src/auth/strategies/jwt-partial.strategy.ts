@@ -1,13 +1,17 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from 'src/users/users.service';
 import { PublicUserDTO } from 'src/users/dto/public-user.dto';
 import { Request } from 'express';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
-export class JwtStrategyPartialUser extends PassportStrategy(Strategy, 'jwt-partial') {
+export class JwtStrategyPartialUser extends PassportStrategy(
+  Strategy,
+  'jwt-partial',
+) {
   constructor(
     private configService: ConfigService,
     private usersService: UsersService,
@@ -32,6 +36,9 @@ export class JwtStrategyPartialUser extends PassportStrategy(Strategy, 'jwt-part
   async validate(payload: any): Promise<PublicUserDTO> {
     // Verifica solo che il JWT sia valido (non scaduto, firma corretta)
     // Restituisce direttamente il payload come PublicUserDTO senza query al database
-    return payload as PublicUserDTO;
+    return plainToInstance(PublicUserDTO, payload, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 }
