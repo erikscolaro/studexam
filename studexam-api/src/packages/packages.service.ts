@@ -57,7 +57,7 @@ export class PackagesService {
     limit: number = 10
   ): Promise<{ packages: PackageEntity[], total: number }> {
     // Validate input requirements
-    const hasValidPartialName = partialName && partialName.length >= 3;
+    const hasValidPartialName = partialName && partialName.trim().length >= 3;
     const hasEnoughKeywords = keywords.length >= 3;
     
     if (!hasValidPartialName && !hasEnoughKeywords) {
